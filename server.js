@@ -23,7 +23,14 @@ const esc = (s) =>
   );
 
 // ---------- TEMPLATE AGENT IA (design VERROUILLÉ) ----------
-function renderSite(site, d, lite) {
+function renderSite(site, d, lite, host) {
+  const favSvg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='${esc(d.accent || "#1a5c3a")}'/><text x='16' y='23' font-family='Inter,Arial,sans-serif' font-size='19' font-weight='800' fill='white' text-anchor='middle'>${esc(String(d.brand).charAt(0))}</text></svg>`;
+  const favHref = "data:image/svg+xml," + encodeURIComponent(favSvg);
+  const origin = host
+    ? (/localhost|127\.|:4321/.test(host) ? "http://" : "https://") + host
+    : "";
+  const attr = (s) => esc(s).replace(/"/g, "&quot;");
+  const metaDesc = attr(d.heroSubtitle);
   const heroWords = String(d.heroTitle)
     .split(" ")
     .map((w) => `<span class="w"><span>${esc(w)}</span></span>`)
@@ -175,7 +182,14 @@ function renderSite(site, d, lite) {
 
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(d.brand)}</title>
+<title>${esc(d.brand)} · ${attr(d.heroEyebrow)}</title>
+<link rel="icon" href="${favHref}">
+<meta name="description" content="${metaDesc}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="${esc(d.brand)} · ${attr(d.heroEyebrow)}">
+<meta property="og:description" content="${metaDesc}">
+${origin ? `<meta property="og:image" content="${origin}/assets/robot.png">\n<meta property="og:url" content="${origin}/?site=${esc(site)}">` : ""}
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -818,6 +832,8 @@ function renderEditor(site, d, host) {
   try {
     savedAtMs = Math.round(fs.statSync(path.join(DIR, site + ".json")).mtimeMs);
   } catch (e) {}
+  const favSvg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='${esc(d.accent || "#1a5c3a")}'/><text x='16' y='23' font-family='Inter,Arial,sans-serif' font-size='19' font-weight='800' fill='white' text-anchor='middle'>${esc(String(d.brand).charAt(0))}</text></svg>`;
+  const favHref = "data:image/svg+xml," + encodeURIComponent(favSvg);
   const fieldHtml = (f) => {
     const v = d[f.k];
     if (f.type === "textarea")
@@ -825,7 +841,7 @@ function renderEditor(site, d, host) {
     if (f.type === "color")
       return `<label class="fld color"><span>${f.label}</span><span class="cwrap"><input type="color" name="${f.k}" value="${esc(v)}" oninput="this.nextElementSibling.textContent=this.value"><b>${esc(v)}</b></span></label>`;
     if (/^tAv\d/.test(f.k))
-      return `<label class="fld"><span>${f.label}</span><span class="imgrow"><img src="${esc(v)}" alt="" onerror="this.classList.add('off')"><input type="text" name="${f.k}" value="${esc(v)}" oninput="var i=this.parentNode.querySelector('img');i.src=this.value;i.classList.remove('off')"></span></label>`;
+      return `<label class="fld"><span>${f.label}</span><div class="imgup"><img class="imgup-prev${v ? "" : " off"}" src="${esc(v)}" alt="" onerror="this.classList.add('off')"><div class="imgup-main"><button type="button" class="imgup-pick">Choisir une image</button><input type="text" name="${f.k}" value="${esc(v)}" placeholder="ou coller une URL" autocomplete="off"></div><input type="file" accept="image/*" class="imgup-file" hidden></div></label>`;
     return `<label class="fld"><span>${f.label}</span><input type="text" name="${f.k}" value="${esc(v)}"></label>`;
   };
   const groups = GROUPS.map((g, gi) => {
@@ -835,6 +851,7 @@ function renderEditor(site, d, host) {
 
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(d.brand)} · Éditeur</title>
+<link rel="icon" href="${favHref}">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -889,10 +906,15 @@ function renderEditor(site, d, host) {
   .cwrap{display:flex;align-items:center;gap:10px}
   .cwrap input{width:38px;height:30px;border:1px solid var(--line2);border-radius:7px;background:var(--field);cursor:pointer;padding:3px}
   .cwrap b{font-size:12.5px;font-weight:600;color:var(--mut);font-variant-numeric:tabular-nums}
-  .imgrow{display:flex;align-items:center;gap:10px}
-  .imgrow img{width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--field);border:1px solid var(--line2)}
-  .imgrow img.off{visibility:hidden}
-  .imgrow input{flex:1}
+  .imgup{position:relative;display:flex;align-items:center;gap:11px;padding:8px;border:1px dashed var(--line2);border-radius:9px;background:var(--field);transition:.14s}
+  .imgup.drag{border-color:var(--accent);background:#181c20}
+  .imgup-prev{width:42px;height:42px;border-radius:8px;object-fit:cover;flex-shrink:0;background:#0d0f11;border:1px solid var(--line2)}
+  .imgup-prev.off{visibility:hidden}
+  .imgup-main{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+  .imgup-pick{align-self:flex-start;font:inherit;font-size:11.5px;font-weight:600;color:var(--txt);background:#22262b;border:1px solid var(--line2);border-radius:6px;padding:5px 11px;cursor:pointer;transition:.13s}
+  .imgup-pick:hover{border-color:var(--accent)}
+  .imgup-main input{width:100%;background:none;border:none;color:var(--mut);font:inherit;font-size:12px;padding:0}
+  .imgup-main input:focus{outline:none;color:var(--txt)}
   .foot{padding:13px 16px;border-top:1px solid var(--line);font-size:11px;line-height:1.45;color:var(--mut2);display:flex;gap:8px;align-items:flex-start}
   .foot svg{width:13px;height:13px;flex-shrink:0;margin-top:1px;color:var(--mut2)}
   /* STAGE */
@@ -914,6 +936,7 @@ function renderEditor(site, d, host) {
     </div>
     <div class="bar-r">
       <span class="saved" id="saved" title="Modifications enregistrées automatiquement"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 17a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 17 8.5a3.5 3.5 0 0 1 .5 6.95"/><path d="m9.4 13.4 1.9 1.9 3.4-3.9"/></svg><span id="savedtxt">Enregistré</span></span>
+      <button class="ghost" id="reset" type="button" title="Restaurer le contenu d'origine">Réinitialiser</button>
       <a class="ghost" href="/?site=${esc(site)}" target="_blank" rel="noopener">Aperçu</a>
       <button class="pub" id="pub">Publier</button>
     </div>
@@ -945,6 +968,11 @@ function renderEditor(site, d, host) {
     document.querySelectorAll('.grp-h').forEach(function(h){h.addEventListener('click',function(){h.parentNode.classList.toggle('open');});});
     // search
     document.getElementById('search').addEventListener('input',function(){var q=this.value.trim().toLowerCase();document.querySelectorAll('.grp').forEach(function(g){var any=false;g.querySelectorAll('.fld').forEach(function(fl){var sp=fl.querySelector('span'),tx=sp?sp.textContent.toLowerCase():'';var hit=!q||tx.indexOf(q)>=0;fl.style.display=hit?'':'none';if(hit)any=true;});g.style.display=any?'':'none';if(q&&any)g.classList.add('open');});});
+    // upload images (drag-drop ou bouton -> /upload -> set URL + autosave)
+    function up(file,w){if(!file||!/^image\\//.test(file.type))return;var ext=(file.name.split('.').pop()||'png').toLowerCase();var inp=w.querySelector('input[type=text]'),img=w.querySelector('.imgup-prev'),pick=w.querySelector('.imgup-pick'),o=pick.textContent;pick.textContent='Envoi';fetch('/upload?ext='+encodeURIComponent(ext),{method:'POST',headers:{'Content-Type':file.type},body:file}).then(function(r){return r.json();}).then(function(j){if(j&&j.url){inp.value=j.url;img.src=j.url;img.classList.remove('off');inp.dispatchEvent(new Event('input',{bubbles:true}));}pick.textContent=o;}).catch(function(){pick.textContent=o;});}
+    document.querySelectorAll('.imgup').forEach(function(w){var file=w.querySelector('.imgup-file'),pick=w.querySelector('.imgup-pick'),img=w.querySelector('.imgup-prev'),inp=w.querySelector('input[type=text]');pick.addEventListener('click',function(){file.click();});file.addEventListener('change',function(){if(file.files[0])up(file.files[0],w);});inp.addEventListener('input',function(){if(inp.value){img.src=inp.value;img.classList.remove('off');}});['dragover','dragenter'].forEach(function(e){w.addEventListener(e,function(ev){ev.preventDefault();w.classList.add('drag');});});['dragleave','dragend'].forEach(function(e){w.addEventListener(e,function(){w.classList.remove('drag');});});w.addEventListener('drop',function(ev){ev.preventDefault();w.classList.remove('drag');if(ev.dataTransfer.files[0])up(ev.dataTransfer.files[0],w);});});
+    // reset contenu
+    document.getElementById('reset').addEventListener('click',function(){if(!confirm("Restaurer le contenu d'origine ? Les modifications seront perdues."))return;fetch('/reset?site=${esc(site)}',{method:'POST'}).then(function(){location.reload();});});
   })();
   </script>
 </body></html>`;
@@ -1002,6 +1030,56 @@ function handler(req, res) {
     return;
   }
 
+  if (req.method === "POST" && url.pathname === "/upload") {
+    const ext =
+      (url.searchParams.get("ext") || "png")
+        .replace(/[^a-z0-9]/gi, "")
+        .slice(0, 5) || "png";
+    const chunks = [];
+    let size = 0,
+      tooBig = false;
+    req.on("data", (c) => {
+      size += c.length;
+      if (size > 6 * 1024 * 1024) {
+        tooBig = true;
+        req.destroy();
+      } else chunks.push(c);
+    });
+    req.on("end", () => {
+      if (tooBig) {
+        res.writeHead(413);
+        res.end();
+        return;
+      }
+      try {
+        const name =
+          "up-" +
+          Date.now().toString(36) +
+          Math.floor(Math.random() * 1e6).toString(36) +
+          "." +
+          ext;
+        fs.writeFileSync(path.join(ASSETS, name), Buffer.concat(chunks));
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ url: "/assets/" + name }));
+      } catch (e) {
+        res.writeHead(500);
+        res.end();
+      }
+    });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/reset") {
+    try {
+      const def = path.join(DIR, site + ".default.json");
+      if (fs.existsSync(def))
+        fs.copyFileSync(def, path.join(DIR, site + ".json"));
+    } catch (e) {}
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
   if (url.pathname === "/admin") {
     res.writeHead(200, {
       "Content-Type": "text/html; charset=utf-8",
@@ -1015,7 +1093,14 @@ function handler(req, res) {
     "Content-Type": "text/html; charset=utf-8",
     "Cache-Control": "no-store",
   });
-  res.end(renderSite(site, load(site), url.searchParams.get("lite") === "1"));
+  res.end(
+    renderSite(
+      site,
+      load(site),
+      url.searchParams.get("lite") === "1",
+      req.headers.host,
+    ),
+  );
 }
 
 module.exports = handler;
