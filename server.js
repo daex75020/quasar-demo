@@ -198,6 +198,11 @@ ${d.heroSpline && !lite ? `<script type="module" src="https://unpkg.com/@splinet
   .nav .links a{color:inherit;text-decoration:none;opacity:.8;transition:.2s}
   .nav .links a:hover{opacity:1}
   .nav .links a.pill{padding:11px 22px;border-radius:2px;background:var(--accent);color:#fff;opacity:1;font-weight:700;letter-spacing:.01em}
+  .burger{display:none;flex-direction:column;justify-content:center;gap:5px;width:42px;height:42px;background:none;border:none;cursor:pointer;padding:0;z-index:21}
+  .burger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;transition:.25s;margin:0 auto}
+  .burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+  .burger.open span:nth-child(2){opacity:0}
+  .burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
 
   /* HERO split + spline */
   .hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;padding:120px 0 60px}
@@ -229,6 +234,7 @@ ${d.heroSpline && !lite ? `<script type="module" src="https://unpkg.com/@splinet
   .hero-visual spline-viewer{position:absolute;top:0;bottom:0;left:50%;width:175%;transform:translateX(-50%);z-index:2;height:100%;display:block;background:transparent;pointer-events:none}
   .hero-visual video{position:relative;z-index:2;width:100%;height:100%;display:block;object-fit:cover;border-radius:18px}
   .hero-visual img{position:relative;z-index:2;width:100%;height:100%;display:block;object-fit:contain;object-position:center bottom}
+  .hero-visual .robot-mob{display:none}
   .hero-poster{position:relative;z-index:2;width:100%;height:100%;border-radius:18px;border:1.5px dashed color-mix(in srgb,var(--accent) 40%,var(--line));background:color-mix(in srgb,var(--accent) 4%,transparent);display:flex;align-items:center;justify-content:center}
   .hero-poster span{font-size:13px;font-weight:500;color:var(--muted);padding:0 30px;text-align:center;max-width:75%;line-height:1.55}
 
@@ -442,9 +448,18 @@ ${d.heroSpline && !lite ? `<script type="module" src="https://unpkg.com/@splinet
 
 
   @media(max-width:920px){
-    .nav .links a:not(.pill){display:none}
-    .hero-inner{grid-template-columns:1fr;gap:30px}
-    .hero-visual{height:52vh;order:2}
+    .nav .row{padding:18px 0}
+    .burger{display:flex}
+    .nav .links{position:absolute;top:calc(100% - 4px);left:22px;right:22px;flex-direction:column;align-items:stretch;gap:0;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:0 34px 70px -34px rgba(0,0,0,.34);display:none}
+    .nav .links.open{display:flex}
+    .nav .links a{padding:14px 14px;opacity:1;border-radius:8px;font-size:15px}
+    .nav .links a:not(.pill):hover{background:var(--panel)}
+    .nav .links a.pill{margin-top:6px;text-align:center;border-radius:8px;padding:14px}
+    .hero{min-height:auto;padding:100px 0 56px}
+    .hero-inner{grid-template-columns:1fr;gap:20px}
+    .hero-visual{height:auto;min-height:0;order:2;animation:none;overflow:hidden}
+    .hero-visual spline-viewer{display:none}
+    .hero-visual .robot-mob{display:block;position:relative;width:100%;height:360px;object-fit:contain;object-position:center}
     .exp .grid{grid-template-columns:1fr;gap:34px}
     .stats .row,.cap-grid,.steps-grid,.price-grid{grid-template-columns:1fr}
     .tier.pop{transform:none}
@@ -452,12 +467,23 @@ ${d.heroSpline && !lite ? `<script type="module" src="https://unpkg.com/@splinet
     .stat:last-child{border-bottom:none}
     .wrap{padding:0 22px}
   }
+  @media(max-width:560px){
+    .hero{padding:92px 0 48px}
+    .hero .actions{flex-direction:column;align-items:stretch;gap:12px}
+    .hero .cta{text-align:center;padding:15px 24px}
+    .hero .ghost{justify-content:center}
+    .hero-visual .robot-mob{height:290px}
+    .social-proof{flex-wrap:wrap;gap:14px}
+    .logo{font-size:26px}
+  }
 </style></head>
 <body>
   <nav class="nav"><div class="wrap"><div class="row">
-    <div class="logo">${esc(d.brand)}<b>.</b></div>
-    <div class="links"><a href="#how">Fonctionnement</a><a href="#services">Capacités</a><a href="#prix">Tarifs</a><a href="#contact">Contact</a><a class="pill" href="#contact">${esc(d.heroCta)}</a></div>
+    <div class="logo">${esc(d.brand)}</div>
+    <div class="links" id="navlinks"><a href="#how">Fonctionnement</a><a href="#services">Capacités</a><a href="#prix">Tarifs</a><a href="#contact">Contact</a><a class="pill" href="#contact">${esc(d.heroCta)}</a></div>
+    <button class="burger" id="burger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
   </div></div></nav>
+  <script>(function(){var b=document.getElementById('burger'),l=document.getElementById('navlinks');if(!b)return;b.addEventListener('click',function(){var o=l.classList.toggle('open');b.classList.toggle('open',o);b.setAttribute('aria-expanded',o);});l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');b.classList.remove('open');});});})();</script>
 
   <header class="hero">
     <div class="hero-glow"></div>
@@ -477,7 +503,7 @@ ${d.heroSpline && !lite ? `<script type="module" src="https://unpkg.com/@splinet
           <div class="sp-text"><div class="sp-stars">${star.repeat(5)}</div><span>${esc(d.heroSocial)}</span></div>
         </div>
       </div>
-      <div class="hero-visual">${heroVisual}</div>
+      <div class="hero-visual">${heroVisual}${d.heroSpline && !lite ? `<img class="robot-mob" src="/assets/robot.png" alt="">` : ""}</div>
     </div>
   </header>
 

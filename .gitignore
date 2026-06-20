@@ -9,3 +9,6 @@ _served.html
 *.jpeg
 *.png
 .playwright-mcp/
+
+# Archive locale (transcript + cles + recap) — JAMAIS sur le repo public
+_projet/
