@@ -5,3 +5,7 @@ _served.html
 *.log
 
 .vercel
+
+*.jpeg
+*.png
+.playwright-mcp/
