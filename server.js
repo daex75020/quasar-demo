@@ -814,6 +814,10 @@ const GROUPS = [
 const ALL_FIELDS = GROUPS.flatMap((g) => g.fields);
 
 function renderEditor(site, d, host) {
+  let savedAtMs = 0;
+  try {
+    savedAtMs = Math.round(fs.statSync(path.join(DIR, site + ".json")).mtimeMs);
+  } catch (e) {}
   const fieldHtml = (f) => {
     const v = d[f.k];
     if (f.type === "textarea")
@@ -850,7 +854,9 @@ function renderEditor(site, d, host) {
   .seg button svg{width:16px;height:16px}
   .seg button:hover{color:var(--mut)}
   .seg button.on{background:#262b31;color:var(--txt)}
-  .saved{font-size:12px;color:var(--mut2);transition:.3s;min-width:96px;text-align:right}
+  .saved{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--mut2);transition:.2s;min-width:158px;justify-content:flex-end;white-space:nowrap}
+  .saved svg{width:14px;height:14px;flex-shrink:0;opacity:.65}
+  .saved.busy{color:var(--mut)}
   .ghost{font-size:13px;font-weight:500;color:var(--mut);text-decoration:none;padding:8px 12px;border-radius:7px;transition:.13s}
   .ghost:hover{color:var(--txt);background:#16191d}
   .pub{padding:9px 18px;background:var(--accent);color:#fff;border:none;border-radius:7px;font:inherit;font-weight:600;font-size:13.5px;cursor:pointer;transition:.13s}
@@ -907,7 +913,7 @@ function renderEditor(site, d, host) {
       <button data-dev="mob" title="Mobile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg></button>
     </div>
     <div class="bar-r">
-      <span class="saved" id="saved">Enregistré</span>
+      <span class="saved" id="saved" title="Modifications enregistrées automatiquement"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 17a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 17 8.5a3.5 3.5 0 0 1 .5 6.95"/><path d="m9.4 13.4 1.9 1.9 3.4-3.9"/></svg><span id="savedtxt">Enregistré</span></span>
       <a class="ghost" href="/?site=${esc(site)}" target="_blank" rel="noopener">Aperçu</a>
       <button class="pub" id="pub">Publier</button>
     </div>
@@ -924,9 +930,13 @@ function renderEditor(site, d, host) {
   </div>
   <script>
   (function(){
-    var form=document.getElementById('ed'),iframe=document.querySelector('iframe[name=preview]'),saved=document.getElementById('saved'),pub=document.getElementById('pub'),t;
-    function save(done){var fd=new URLSearchParams(new FormData(form));saved.textContent='Enregistrement';fetch('/save?site=${esc(site)}&autosave=1',{method:'POST',body:fd}).then(function(){saved.textContent='Enregistré';try{iframe.contentWindow.location.reload();}catch(e){iframe.src=iframe.src;}if(done)done();});}
-    form.addEventListener('input',function(){saved.textContent='Modifié';clearTimeout(t);t=setTimeout(save,650);});
+    var form=document.getElementById('ed'),iframe=document.querySelector('iframe[name=preview]'),saved=document.getElementById('saved'),savedtxt=document.getElementById('savedtxt'),pub=document.getElementById('pub'),t;
+    var savedAt=${savedAtMs} || Date.now();
+    function rel(ms){var s=Math.floor((Date.now()-ms)/1000);if(s<60)return "à l'instant";if(s<3600){var m=Math.floor(s/60);return 'il y a '+m+(m>1?' min':' min');}if(s<86400){var d=new Date(ms);return 'à '+('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);}var j=Math.floor(s/86400);return 'il y a '+j+(j>1?' jours':' jour');}
+    function showSaved(){saved.classList.remove('busy');savedtxt.textContent='Enregistré '+rel(savedAt);}
+    showSaved();setInterval(function(){if(!saved.classList.contains('busy'))showSaved();},20000);
+    function save(done){saved.classList.add('busy');savedtxt.textContent='Enregistrement';var fd=new URLSearchParams(new FormData(form));fetch('/save?site=${esc(site)}&autosave=1',{method:'POST',body:fd}).then(function(){savedAt=Date.now();showSaved();try{iframe.contentWindow.location.reload();}catch(e){iframe.src=iframe.src;}if(done)done();});}
+    form.addEventListener('input',function(){saved.classList.add('busy');savedtxt.textContent='Modifications en cours';clearTimeout(t);t=setTimeout(function(){save();},650);});
     pub.addEventListener('click',function(){clearTimeout(t);var o=pub.textContent;save(function(){pub.textContent='Publié';setTimeout(function(){pub.textContent=o;},1500);});});
     // device toggle
     var frame=document.getElementById('frame'),chip=document.getElementById('chip'),sizes={desk:['100%','Bureau'],tab:['834px','Tablette'],mob:['390px','Mobile']};
