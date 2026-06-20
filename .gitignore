@@ -3,3 +3,5 @@ cloudflared.exe
 tunnel.log
 _served.html
 *.log
+
+.vercel

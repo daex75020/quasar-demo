@@ -224,9 +224,9 @@ ${d.heroSpline && !lite ? `<script>try{Object.defineProperty(window,'devicePixel
   .ghost::after{content:'→';transition:transform .25s}
   .ghost:hover::after{transform:translateX(5px)}
 
-  .hero-visual{position:relative;height:90vh;min-height:640px;animation:floaty 5s ease-in-out infinite}
+  .hero-visual{position:relative;height:90vh;min-height:640px;animation:floaty 5s ease-in-out infinite;z-index:8;overflow:visible}
   @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
-  .hero-visual spline-viewer{position:absolute;inset:0;z-index:2;width:100%;height:100%;display:block;background:transparent}
+  .hero-visual spline-viewer{position:absolute;inset:0 -4% 0 -24%;z-index:2;height:100%;display:block;background:transparent;pointer-events:none}
   .hero-visual video{position:relative;z-index:2;width:100%;height:100%;display:block;object-fit:cover;border-radius:18px}
   .hero-visual img{position:relative;z-index:2;width:100%;height:100%;display:block;object-fit:contain;object-position:center bottom}
   .hero-poster{position:relative;z-index:2;width:100%;height:100%;border-radius:18px;border:1.5px dashed color-mix(in srgb,var(--accent) 40%,var(--line));background:color-mix(in srgb,var(--accent) 4%,transparent);display:flex;align-items:center;justify-content:center}
