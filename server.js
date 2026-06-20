@@ -888,7 +888,6 @@ function renderEditor(site, d, host) {
     <aside class="panel">
       <div class="search"><input id="search" type="text" placeholder="Rechercher un champ" autocomplete="off"></div>
       <div class="scroll"><form id="ed">${groups}</form></div>
-      <div class="foot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Le design est verrouillé. Vous changez le texte et les visuels, la mise en page ne bouge jamais.</span></div>
     </aside>
     <main class="stage">
       <span class="chip" id="chip">Bureau</span>
