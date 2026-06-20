@@ -872,7 +872,7 @@ const TYPES = {
   ".svg": "image/svg+xml",
 };
 
-const server = http.createServer((req, res) => {
+function handler(req, res) {
   const url = new URL(req.url, "http://localhost");
 
   // static assets
@@ -925,10 +925,16 @@ const server = http.createServer((req, res) => {
     "Cache-Control": "no-store",
   });
   res.end(renderSite(site, load(site), url.searchParams.get("lite") === "1"));
-});
+}
 
-server.listen(process.env.PORT || 4321, "0.0.0.0", () =>
-  console.log(
-    "Démo sur http://localhost:" + (process.env.PORT || 4321) + "/admin",
-  ),
-);
+module.exports = handler;
+
+if (require.main === module) {
+  http
+    .createServer(handler)
+    .listen(process.env.PORT || 4321, "0.0.0.0", () =>
+      console.log(
+        "Démo sur http://localhost:" + (process.env.PORT || 4321) + "/admin",
+      ),
+    );
+}
