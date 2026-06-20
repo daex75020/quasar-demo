@@ -179,7 +179,7 @@ function renderSite(site, d, lite) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-${d.heroSpline && !lite ? `<script>try{Object.defineProperty(window,'devicePixelRatio',{configurable:true,get:function(){return 1}})}catch(e){}</script><script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js"></script>` : ""}
+${d.heroSpline && !lite ? `<script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js"></script>` : ""}
 <style>
   :root{ --accent:${esc(d.accent)}; --bg:${esc(d.colBg || "#ffffff")}; --panel:#f4f6f4; --text:${esc(d.colText || "#0b0b0c")}; --muted:#5c5c64; --line:rgba(0,0,0,.11); --dark:${esc(d.colDark || "#0b0b0c")} }
   @property --ba{syntax:'<angle>';inherits:false;initial-value:0deg}
