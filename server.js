@@ -234,7 +234,7 @@ ${d.heroSpline && !lite ? `<script type="module" src="https://unpkg.com/@splinet
   .hero-visual spline-viewer{position:absolute;top:0;bottom:0;left:50%;width:175%;transform:translateX(-50%);z-index:2;height:100%;display:block;background:transparent;pointer-events:none}
   .hero-visual video{position:relative;z-index:2;width:100%;height:100%;display:block;object-fit:cover;border-radius:18px}
   .hero-visual img{position:relative;z-index:2;width:100%;height:100%;display:block;object-fit:contain;object-position:center bottom}
-  .hero-visual .robot-mob{display:none}
+  .hero-mob-visual{display:none}
   .hero-poster{position:relative;z-index:2;width:100%;height:100%;border-radius:18px;border:1.5px dashed color-mix(in srgb,var(--accent) 40%,var(--line));background:color-mix(in srgb,var(--accent) 4%,transparent);display:flex;align-items:center;justify-content:center}
   .hero-poster span{font-size:13px;font-weight:500;color:var(--muted);padding:0 30px;text-align:center;max-width:75%;line-height:1.55}
 
@@ -457,9 +457,9 @@ ${d.heroSpline && !lite ? `<script type="module" src="https://unpkg.com/@splinet
     .nav .links a.pill{margin-top:6px;text-align:center;border-radius:8px;padding:14px}
     .hero{min-height:auto;padding:100px 0 56px}
     .hero-inner{grid-template-columns:1fr;gap:20px}
-    .hero-visual{height:auto;min-height:0;order:2;animation:none;overflow:hidden}
-    .hero-visual spline-viewer{display:none}
-    .hero-visual .robot-mob{display:block;position:relative;width:100%;height:360px;object-fit:contain;object-position:center}
+    .hero-mob-visual{display:block;position:relative;height:380px;margin:12px 0 6px;overflow:hidden}
+    .hero-mob-visual .hero-visual{position:absolute;inset:0;height:100%;min-height:0;animation:none;overflow:visible}
+    .hero-mob-visual spline-viewer{width:120%}
     .exp .grid{grid-template-columns:1fr;gap:34px}
     .stats .row,.cap-grid,.steps-grid,.price-grid{grid-template-columns:1fr}
     .tier.pop{transform:none}
@@ -472,7 +472,7 @@ ${d.heroSpline && !lite ? `<script type="module" src="https://unpkg.com/@splinet
     .hero .actions{flex-direction:column;align-items:stretch;gap:12px}
     .hero .cta{text-align:center;padding:15px 24px}
     .hero .ghost{justify-content:center}
-    .hero-visual .robot-mob{height:290px}
+    .hero-mob-visual{height:310px}
     .social-proof{flex-wrap:wrap;gap:14px}
     .logo{font-size:26px}
   }
@@ -485,13 +485,14 @@ ${d.heroSpline && !lite ? `<script type="module" src="https://unpkg.com/@splinet
   </div></div></nav>
   <script>(function(){var b=document.getElementById('burger'),l=document.getElementById('navlinks');if(!b)return;b.addEventListener('click',function(){var o=l.classList.toggle('open');b.classList.toggle('open',o);b.setAttribute('aria-expanded',o);});l.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){l.classList.remove('open');b.classList.remove('open');});});})();</script>
 
-  <header class="hero">
+  <header class="hero" id="hero">
     <div class="hero-glow"></div>
     <div class="hero-grid-lines"></div>
     <div class="hero-inner wrap">
       <div class="hero-text">
         <div class="eyebrow"><span class="eb-wa">${waLogo}</span>${esc(d.heroEyebrow)}</div>
         <h1>${heroWords}</h1>
+        <div class="hero-mob-visual" id="hvmount"></div>
         <p class="lede">${esc(d.heroSubtitle)}</p>
         <div class="actions">
           <a class="cta" href="#contact">${esc(d.heroCta)}</a>
@@ -503,9 +504,10 @@ ${d.heroSpline && !lite ? `<script type="module" src="https://unpkg.com/@splinet
           <div class="sp-text"><div class="sp-stars">${star.repeat(5)}</div><span>${esc(d.heroSocial)}</span></div>
         </div>
       </div>
-      <div class="hero-visual">${heroVisual}${d.heroSpline && !lite ? `<img class="robot-mob" src="/assets/robot.png" alt="">` : ""}</div>
+      <div class="hero-visual">${heroVisual}</div>
     </div>
   </header>
+  <script>(function(){var hv=document.querySelector('.hero-visual'),mount=document.getElementById('hvmount'),inner=document.querySelector('.hero-inner');if(!hv||!mount||!inner)return;var mq=window.matchMedia('(max-width:920px)');function place(){if(mq.matches){if(hv.parentNode!==mount)mount.appendChild(hv);}else{if(hv.parentNode!==inner)inner.appendChild(hv);}}place();try{mq.addEventListener('change',place);}catch(e){mq.addListener(place);}})();</script>
 
   <div class="marquee"><div class="mq-track">${marquee}</div></div>
 
